@@ -3,3 +3,6 @@ node_modules/
 .DS_Store
 ._*
 *.seed
+# local demo run artifacts (throwaway wallet)
+/content.json
+/claim.json

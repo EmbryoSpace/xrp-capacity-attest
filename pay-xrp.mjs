@@ -7,7 +7,11 @@
 // Usage:
 //   XRPL_SEED=s... node pay-xrp.mjs --to rPAYEE --drops 100000
 //   XRPL_SEED=s... node pay-xrp.mjs --to rPAYEE --xrp 0.1 --tag 12345
+//   XRPL_SEED=s... node pay-xrp.mjs --to rPAYEE --xrp 0.1 --memo "invoice 7f3a"
 //   node pay-xrp.mjs --to rPAYEE --drops 1000 --dry-run --sequence 1 --fee 12 --last-ledger 9  (offline build+sign only)
+//
+// --memo writes a plain-text memo on-chain (publicly visible). --memo-type and
+// --memo-format are optional companions.
 //
 // Network: public XRPL JSON-RPC (XRPL_RPC env, default mainnet). Use
 // https://s.altnet.rippletest.net:51234 for testnet.
@@ -69,10 +73,20 @@ async function main() {
   };
   if (arg('--tag')) tx.DestinationTag = Number(arg('--tag'));
 
+  const toHex = (s) => Buffer.from(String(s), 'utf8').toString('hex').toUpperCase();
+  const memo = arg('--memo');
+  if (memo) {
+    const m = { MemoData: toHex(memo) };
+    if (arg('--memo-type')) m.MemoType = toHex(arg('--memo-type'));
+    if (arg('--memo-format')) m.MemoFormat = toHex(arg('--memo-format'));
+    tx.Memos = [{ Memo: m }];
+  }
+
   const { tx_blob, hash } = wallet.sign(tx);
   console.log('from   :', wallet.classicAddress);
   console.log('to     :', to);
   console.log('amount :', Number(drops) / 1e6, 'XRP (', drops, 'drops )');
+  if (memo) console.log('memo   :', memo);
   console.log('tx hash:', hash);
 
   if (dryRun) { console.log('\n--dry-run: signed locally, NOT submitted. tx_blob length', tx_blob.length); return; }
