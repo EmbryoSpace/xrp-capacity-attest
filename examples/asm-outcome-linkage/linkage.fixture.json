@@ -1,0 +1,68 @@
+{
+  "fixture_type": "asm_external_attestation_linkage",
+  "fixture_version": "0.1",
+  "status": "verified_against_live_mainnet_settlement",
+  "historical_asm_use": false,
+  "producer": {
+    "name": "xrp-capacity-attest",
+    "repository": "https://github.com/EmbryoSpace/xrp-capacity-attest",
+    "content_addressing_shared_with": {
+      "name": "capacity-attest",
+      "repository": "https://github.com/holistis/tokenizen/tree/main/packages/capacity-attest",
+      "note": "Same rail-neutral content-addressing (sha256 of canonical JSON of the content fields) as the Base and BSV rails. XRP-specific parts (ed25519 signature envelope, XRPL classic-address encoding) are isolated behind the rail adapter."
+    }
+  },
+  "external_attestation": {
+    "raw_claim_url": "https://raw.githubusercontent.com/EmbryoSpace/xrp-capacity-attest/319a27a625d4a955f9406875edebfa3ccf0e0aa2/examples/asm-outcome-linkage/claim.json",
+    "raw_claim_sha256": "sha256:5920cda6a9d492a94e9c2a7ba2a7be10e9a10246d5fca527a7a3eb325daf61e2",
+    "claim_id": "0x58a81c4e11ad4ad826195a9966a36135e6a21c342fa2d697bb90bf6ad93ea227",
+    "expected_signer": "rhtRtNaepUZ6nAfEfTvTMKiJjGcWWKAL7y",
+    "verifier": {
+      "package": "xrp-capacity-attest",
+      "commit": "319a27a625d4a955f9406875edebfa3ccf0e0aa2",
+      "import": "./xrpl-claim.mjs",
+      "function": "verifyClaim",
+      "note": "Verifies an ed25519 XRPL signature; the claim carries the payer public key which must derive to buyerAddress (XRPL classic r-address)."
+    }
+  },
+  "settlement": {
+    "chain_namespace": "xrpl",
+    "chain_reference": "0",
+    "network_name": "XRP Ledger Mainnet",
+    "chain_reference_note": "XRPL mainnet. Disambiguated by the tx existing on the XRP Ledger (verify via any XRPL explorer / public JSON-RPC).",
+    "transaction_hash": "9B11FCBBB120D274407322A23398A3B3616842F5D137A9789D37CFE8B7BC6A4E",
+    "transaction_status": "validated",
+    "asset_symbol": "XRP",
+    "asset_decimals": 6,
+    "raw_amount": "1500000",
+    "display_amount": "1.5",
+    "payer": "rhtRtNaepUZ6nAfEfTvTMKiJjGcWWKAL7y",
+    "payee": "rUu3fKFPbgfDgZxytNPW8n87NmZ5pgUXK1"
+  },
+  "asm_mapping": {
+    "chain_order": ["DecisionReceipt", "OutcomeReceipt", "external_attestation_reference"],
+    "decision_receipt_must_not_reference_post_call_claim": true,
+    "outcome_binding_requirements": [
+      "outcome receipt digest",
+      "stable raw claim URL",
+      "claim ID",
+      "verifier package and exact commit",
+      "settlement reference",
+      "verification result"
+    ],
+    "current_outcome_schema_limit": "OutcomeReceipt v0.1-draft cannot type a non-fiat XRP settlement or external attestation reference without an extension mapping."
+  },
+  "verified": [
+    "raw claim bytes match the pinned digest",
+    "claim content recomputes to claimId (sha256 of canonical content)",
+    "ed25519 signature verifies under the payer public key, which derives to buyerAddress",
+    "XRPL Payment is validated (tesSUCCESS)",
+    "the Payment delivered drops from payer to payee"
+  ],
+  "not_independently_proven": [
+    "delivered=yes",
+    "evidenceHash preimage",
+    "task correctness",
+    "historical use of ASM for the paid call"
+  ]
+}
