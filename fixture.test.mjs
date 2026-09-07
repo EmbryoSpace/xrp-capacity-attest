@@ -1,14 +1,17 @@
 // Fixture test in the same shape as asm-spec #18 (the Base/USDC fixture) and the
 // BSV sibling (#19): follow the pinned link, check the bytes, recompute the
-// claimId, recover the signature, and check the on-chain settlement, and encode,
+// claimId, verify the signature, and check the on-chain settlement, and encode,
 // as explicit assertions, exactly what the fixture does NOT prove. It
 // demonstrates the downstream linkage shape for an XRP-settled claim; it is not
 // evidence that ASM was used for the original call.
 //
 // Verifier profile: xrpl-claim adapter (this repo), canonicalize + sha256 content
 // address (rail-neutral, identical to capacity-attest) + ed25519 XRPL signature
-// recovery to a classic r-address. capacity-attest itself (holistis/tokenizen)
-// verifies the Base/USDC sibling; see #18.
+// verification. NOTE: ed25519 signatures are not public-key-recoverable (unlike
+// the BSV rail's secp256k1 ECDSA), so the claim carries the payer public key and
+// the check is: the signature verifies under that key AND deriveAddress(key)
+// equals buyerAddress. capacity-attest itself (holistis/tokenizen) verifies the
+// Base/USDC sibling; see #18.
 //
 // The settlement check is a live XRPL JSON-RPC read, matching #18's live on-chain
 // verification. Set XRPL_OFFLINE=1 (or FIXTURE_OFFLINE=1) to skip only that
@@ -38,7 +41,7 @@ test('ASM XRP fixture: bsvkey XRP rail -> ASM outcome linkage', async (t) => {
     assert.equal(claim.claimId, fixture.external_attestation.claim_id);
   });
 
-  await t.test('payer signature: ed25519 recovers to buyerPublicKey and that derives to buyerAddress', () => {
+  await t.test('payer signature: ed25519 signature verifies under buyerPublicKey, which derives to buyerAddress', () => {
     assert.deepEqual(verifyClaim(claim), { ok: true });
     assert.equal(claim.buyerAddress, fixture.external_attestation.expected_signer);
   });

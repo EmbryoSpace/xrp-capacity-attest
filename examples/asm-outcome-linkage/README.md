@@ -28,10 +28,16 @@ XRPL_OFFLINE=1 node --test fixture.test.mjs   # skip only the on-chain read
 
 The test mirrors #18/#19: it checks that the raw claim bytes match the pinned
 digest, that the content recomputes to the claimId, that the ed25519 signature
-recovers to the payer public key which derives to `buyerAddress`, and that the
+verifies under the payer public key which derives to `buyerAddress`, and that the
 XRPL Payment is validated and delivered drops from payer to payee. It asserts, as
 explicit non-claims, that `delivered=yes`, the `evidenceHash` preimage, task
 correctness, and historical ASM use are **not** independently proven.
+
+Note on the crypto: ed25519 signatures are not public-key-recoverable (unlike the
+BSV rail's secp256k1 ECDSA, which recovers the signer from the signature). So the
+XRP claim carries the payer public key and the adapter verifies the signature
+under it, then requires `deriveAddress(publicKey) == buyerAddress`. That is the
+accurate description of what the check establishes.
 
 ## How it was produced
 
