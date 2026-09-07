@@ -1,0 +1,3 @@
+# The pinned attestation claim is content-addressed and referenced by a sha256
+# of its exact bytes. Treat it as binary so Git never rewrites line endings.
+examples/asm-outcome-linkage/claim.json -text
